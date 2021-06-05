@@ -1,0 +1,8 @@
+# SSL CERTS
+ssl/*
+
+# SCRIPTS
+*.sh
+
+# KEEP DEPLOY
+!deploy.sh
