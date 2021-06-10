@@ -4,6 +4,8 @@
 IMAGE="docker-php"
 HOST="localhost"
 PHP="5.6"
+HTTPS=""
+HTTP=""
 SRC=""
 WWW=""
 
@@ -15,6 +17,16 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+	--https)
+	    HTTPS="$2"
+	    shift
+	    shift
+	    ;;
+	--http)
+	    HTTP="$2"
+	    shift
+	    shift
+	    ;;
         --host)
             HOST="$2"
             shift
@@ -50,14 +62,14 @@ if ! [ -d "$SRC" ]; then echo "[ERROR] Source path not found: $SRC"; exit; fi
 echo "[INFO] Setting Dockerfile..."
 
 { cp Dockerfile Dockerfile-tmp; } || { exit; }
-{ sed -i "s/{host}/$HOST/g" Dockerfile-tmp; } || { exit; }
-{ sed -i "s/{phpver}/$PHP/g" Dockerfile-tmp; } || { exit; }
+{ sed -i '' "s/{host}/$HOST/g" Dockerfile-tmp; } || { exit; }
+{ sed -i '' "s/{phpver}/$PHP/g" Dockerfile-tmp; } || { exit; }
 
 echo "[INFO] Configuring Apache..."
 
 { cp apache.conf apache-tmp.conf; } || { exit; }
-{ sed -i "s/html/$WWW/g" apache-tmp.conf; } || { exit; }
-{ sed -i "s/localhost/$HOST/g" apache-tmp.conf; } || { exit; }
+{ sed -i '' "s/html/$WWW/g" apache-tmp.conf; } || { exit; }
+{ sed -i '' "s/localhost/$HOST/g" apache-tmp.conf; } || { exit; }
 
 if ! [ -d "ssl/$HOST" ]; then { mkdir -p ssl/$HOST; } || { exit; }; fi
 
@@ -90,7 +102,10 @@ fi
 
 echo "[INFO] Creating service container..."
 
-{ docker run --restart always --name $HOST --network $HOST -v $SRC:/var/www -d $IMAGE &> /dev/null; } || { exit; }
+if ! [ -z "$HTTP" ]; then HTTP="-p $HTTP:80"; fi
+if ! [ -z "$HTTPS" ]; then HTTPS="-p $HTTPS:443"; fi
+
+{ docker run --restart always --name $HOST --network $HOST -v $SRC:/var/www $HTTP $HTTPS -d $IMAGE &> /dev/null; } || { exit; }
 
 if [ -f "$SRC/composer.json" ]; then
 
@@ -105,8 +120,8 @@ fi
 
 echo "[INFO] Removing temporary files..."
 
-rm apache-tmp.conf &> /dev/null
-rm Dockerfile-tmp &> /dev/null
+#rm apache-tmp.conf &> /dev/null
+#rm Dockerfile-tmp &> /dev/null
 
 echo "[INFO] Service deploy time: $(($SECONDS / 60))m$(($SECONDS % 60))s"
 
