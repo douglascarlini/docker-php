@@ -8,6 +8,7 @@ HTTPS=""
 HTTP=""
 SRC=""
 WWW=""
+UP=""
 
 # Arguments
 while [[ $# -gt 0 ]]; do
@@ -47,6 +48,10 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+         --up)
+            UP="Y"
+            shift
+            ;;   
             *)
             shift
             ;;
@@ -82,6 +87,8 @@ echo "[INFO] Generating SSL cert..."
 echo "[INFO] Building service image..."
 
 { docker build -f Dockerfile-tmp -t $IMAGE .; } || { exit; }
+
+if [ -z "$UP" ]; then exit; fi
 
 if ! [ -z "$(docker ps -a | grep $HOST)" ]; then
 
