@@ -1,13 +1,11 @@
-# SSL CERTS
-ssl/*
+**/*.swp
+/*.sh
 
-# BASH
-*.sh
+/ssl
+/www
 
-# DEPLOY
-!deploy.sh
 
-# TEMPLATES
-Dockerfile-tmp
-apache-tmp.conf
+/!deploy.sh
 
+/Dockerfile-tmp
+/apache-tmp.conf

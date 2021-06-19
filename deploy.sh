@@ -17,16 +17,16 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
-	--https)
-	    HTTPS="$2"
-	    shift
-	    shift
-	    ;;
-	--http)
-	    HTTP="$2"
-	    shift
-	    shift
-	    ;;
+        --https)
+            HTTPS="$2"
+            shift
+            shift
+            ;;
+        --http)
+            HTTP="$2"
+            shift
+            shift
+            ;;
         --host)
             HOST="$2"
             shift
@@ -55,7 +55,7 @@ done
 
 echo "[INFO] Checking arguments..."
 
-if [ -z "$SRC" ]; then echo "[ERROR] Missing argument: --src /path/to/source"; exit; fi
+if [ -z "$SRC" ]; then if ! [ -d www ]; then mkdir www; fi; echo "<?php phpinfo();" > www/index.php; SRC="$PWD/www"; fi
 if [ -z "$HOST" ]; then echo "[ERROR] Missing argument: --host nice.app"; exit; fi
 if ! [ -d "$SRC" ]; then echo "[ERROR] Source path not found: $SRC"; exit; fi
 
