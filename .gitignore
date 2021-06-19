@@ -1,8 +1,13 @@
 # SSL CERTS
 ssl/*
 
-# SCRIPTS
+# BASH
 *.sh
 
-# KEEP DEPLOY
+# DEPLOY
 !deploy.sh
+
+# TEMPLATES
+Dockerfile-tmp
+apache-tmp.conf
+
