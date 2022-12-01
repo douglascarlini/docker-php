@@ -4,8 +4,8 @@
 IMAGE="docker-php"
 HOST="localhost"
 PHP="5.6"
+PORT=""
 SRC=""
-WWW=""
 
 # Arguments
 while [[ $# -gt 0 ]]; do
@@ -20,15 +20,15 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+        --port)
+            PORT="$2"
+            shift
+            shift
+            ;;
         --src)
             SRC="$2"
             shift
             shift
-            ;;
-        --www)
-            WWW="$2"
-            shift;
-            shift;
             ;;
         --php)
             PHP="$2"
@@ -50,14 +50,13 @@ if ! [ -d "$SRC" ]; then echo "[ERROR] Source path not found: $SRC"; exit; fi
 echo "[INFO] Setting Dockerfile..."
 
 { cp Dockerfile Dockerfile-tmp; } || { exit; }
-{ sed -i "s/{host}/$HOST/g" Dockerfile-tmp; } || { exit; }
-{ sed -i "s/{phpver}/$PHP/g" Dockerfile-tmp; } || { exit; }
+{ sed -i '' "s/{host}/$HOST/g" Dockerfile-tmp; } || { exit; }
+{ sed -i '' "s/{phpver}/$PHP/g" Dockerfile-tmp; } || { exit; }
 
 echo "[INFO] Configuring Apache..."
 
 { cp apache.conf apache-tmp.conf; } || { exit; }
-{ sed -i "s/html/$WWW/g" apache-tmp.conf; } || { exit; }
-{ sed -i "s/localhost/$HOST/g" apache-tmp.conf; } || { exit; }
+{ sed -i '' "s/localhost/$HOST/g" apache-tmp.conf; } || { exit; }
 
 if ! [ -d "ssl/$HOST" ]; then { mkdir -p ssl/$HOST; } || { exit; }; fi
 
@@ -74,7 +73,7 @@ echo "[INFO] Building service image..."
 if ! [ -z "$(docker ps -a | grep $HOST)" ]; then
 
 	echo "[WARN] Removing old container..."
-    
+
 	{ docker stop $HOST &> /dev/null; } || { exit; }
 	{ docker rm $HOST &> /dev/null; } || { exit; }
 
@@ -90,14 +89,19 @@ fi
 
 echo "[INFO] Creating service container..."
 
-{ docker run --restart always --name $HOST --network $HOST -v $SRC:/var/www -d $IMAGE &> /dev/null; } || { exit; }
+
+if [ -z "$PORT" ]; then
+    { docker run --restart always --name $HOST --network $HOST -v $SRC:/var/www/html -d $IMAGE &> /dev/null; } || { exit; }
+else
+    { docker run --restart always --name $HOST --network $HOST -v $SRC:/var/www/html -p $PORT:80 -d $IMAGE &> /dev/null; } || { exit; }
+fi
 
 if [ -f "$SRC/composer.json" ]; then
 
     if ! [ -d "$SRC/vendor" ]; then
 
         echo "[INFO] Downloading dependencies with composer..."
-        { docker exec -i $HOST bash -c "cd /var/www && rm composer.lock && curl -s https://getcomposer.org/composer.phar -o composer.phar && php composer.phar install --no-interaction" &> /dev/null; } || { exit; }
+        { docker exec -i $HOST bash -c "cd /var/www/html && rm composer.lock && curl -s https://getcomposer.org/composer.phar -o composer.phar && php composer.phar install --no-interaction" &> /dev/null; } || { exit; }
 
     fi
 
