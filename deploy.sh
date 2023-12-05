@@ -50,13 +50,13 @@ if ! [ -d "$SRC" ]; then echo "[ERROR] Source path not found: $SRC"; exit; fi
 echo "[INFO] Setting Dockerfile..."
 
 { cp Dockerfile Dockerfile-tmp; } || { exit; }
-{ sed -i '' "s/{host}/$HOST/g" Dockerfile-tmp; } || { exit; }
-{ sed -i '' "s/{phpver}/$PHP/g" Dockerfile-tmp; } || { exit; }
+{ sed -i "s/{host}/$HOST/g" Dockerfile-tmp; } || { exit; }
+{ sed -i "s/{phpver}/$PHP/g" Dockerfile-tmp; } || { exit; }
 
 echo "[INFO] Configuring Apache..."
 
 { cp apache.conf apache-tmp.conf; } || { exit; }
-{ sed -i '' "s/localhost/$HOST/g" apache-tmp.conf; } || { exit; }
+{ sed -i "s/localhost/$HOST/g" apache-tmp.conf; } || { exit; }
 
 if ! [ -d "ssl/$HOST" ]; then { mkdir -p ssl/$HOST; } || { exit; }; fi
 
